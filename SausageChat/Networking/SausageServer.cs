@@ -1,16 +1,21 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-using SausageChat.Messaging;
+using SausageChat.Core.Messaging;
 using SausageChat.Helpers;
 using SausageChat.Core;
 using System.Collections.ObjectModel;
+using SausageChat.Core.Networking;
+using Newtonsoft.Json;
+using System.Windows.Forms;
+using System.Threading;
 
 namespace SausageChat.Networking
 {
+    // TD -> when renaming, make sure there isn't another user called the same name (would mess up Mute/Kick/Ban)
     static class SausageServer
     {
         public static bool IsOpen { get; set; } = false;
@@ -18,7 +23,7 @@ namespace SausageChat.Networking
         public static MainWindow Mw { get; set; }
         public static Socket MainSocket { get; set; }
         public const int PORT = 60000;
-        public static ObservableCollection<User> ConnectedUsers
+        public static ObservableCollection<SausageConnection> ConnectedUsers
         {
             get
             {
@@ -28,19 +33,29 @@ namespace SausageChat.Networking
             {
                 Vm.ConnectedUsers = value;
             }
-        }
+    }
+        public static SausageUserList UsersDictionary { get; set; } = new SausageUserList();
         public static List<IPAddress> Blacklisted { get; set; } = new List<IPAddress>();
         public static IPEndPoint LocalIp { get; set; } = new IPEndPoint(IPAddress.Any, PORT);
+        public static SynchronizationContext UiCtx { get; set; }
         
         public static void Open()
         {
-            if(!IsOpen)
+            if (!IsOpen)
             {
                 MainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                ConnectedUsers = new ObservableCollection<User>();
-                MainSocket.Listen(10);
+                ConnectedUsers = new ObservableCollection<SausageConnection>();
+                UsersDictionary = new SausageUserList();
                 MainSocket.Bind(LocalIp);
+                MainSocket.Listen(10);
+                UiCtx = SynchronizationContext.Current;
                 MainSocket.BeginAccept(OnUserConnect, null);
+                IsOpen = true;
+                UiCtx.Send(x => Vm.Messages.Add(new ServerMessage("Opened server")));
+            }
+            else
+            {
+                UiCtx.Send(x => Vm.Messages.Add(new ServerMessage("Server already open")));
             }
         }
 
@@ -49,112 +64,207 @@ namespace SausageChat.Networking
             if(IsOpen)
             {
                 MainSocket.Close();
-                foreach(User u in ConnectedUsers)
+                foreach(SausageConnection u in ConnectedUsers)
                 {
                     u.Disconnect();
                 }
-                Vm.Messages.Add(new ServerMessage("Closed all sockets"));
-            }
-        }
-
-        public static async Task<ServerCommandResult> Ban(User user)
-        {
-            if (user == null)
-                return ServerCommandResult.UserIsNull;
-            else if (ConnectedUsers.Any(x => x == user))
-            {
-                Blacklisted.Add(user.Ip.Address);
-                await Log(new ServerMessage($"{CommandParser.ToString(CommandType.UserBanned)}{user.Name}"));
-                await user.Disconnect();
-                return ServerCommandResult.Success;
+                UiCtx.Send(x => Vm.Messages.Add(new ServerMessage("Closed all sockets")));
+                IsOpen = false;
             }
             else
             {
-                return ServerCommandResult.UserNotFound;
+                MessageBox.Show("Server is already closed", "Sausage Server");
             }
         }
 
-        public static async Task<ServerCommandResult> Kick(User user)
+        // TODO: logging
+        public static async Task Ban(SausageConnection user)
         {
-            if (user == null)
-                return ServerCommandResult.UserIsNull;
-            else if (ConnectedUsers.Any(x => x == user))
+            try
             {
-                await Log(new ServerMessage($"{CommandParser.ToString(CommandType.UserKicked)}{user.Name}"));
-                await user.Disconnect();
-                return ServerCommandResult.Success;
+                if (!(user.Socket.Connected || MainSocket.Connected)) return;
+                // user exists
+                if (ConnectedUsers.Any(x => x.UserInfo.Guid == user.UserInfo.Guid))
+                {
+                    Blacklisted.Add(user.Ip.Address);
+                    PacketFormat packet = new PacketFormat(PacketOption.UserBanned)
+                    {
+                        Guid = user.UserInfo.Guid,
+                        Content = "Place-holder reason"
+                    };
+                    Log(packet);
+                    await Task.Delay(1000);
+                    // delay for waiting on the client to recieve a message
+                    user.Disconnect();
+                    UiCtx.Send(x => ConnectedUsers.Remove(user));
+                }
+                else
+                {
+                    MessageBox.Show("User not found", "Ban result");
+                }
             }
-            else
+            catch (ArgumentNullException e)
             {
-                return ServerCommandResult.UserNotFound;
+                MessageBox.Show($"User returned null {e}", "Exception Caught");
+            }
+        }
+        
+        public static async Task Kick(SausageConnection user)
+        {
+            try
+            {
+                if (!(user.Socket.Connected || MainSocket.Connected)) return;
+                // user exists
+                if (ConnectedUsers.Any(x => x.UserInfo.Guid == user.UserInfo.Guid))
+                {
+                    PacketFormat packet = new PacketFormat(PacketOption.UserKicked)
+                    {
+                        Guid = user.UserInfo.Guid,
+                        Content = "Place-holder reason"
+                    };
+                    await Log(packet);
+                    // delay for waiting on the client to recieve a message
+                    await Task.Delay(1000);
+                    user.Disconnect();
+                    UiCtx.Send(x => Vm.ConnectedUsers.Remove(user));
+                }
+                else
+                {
+                    MessageBox.Show("User not found", "Kick result");
+                }
+            }
+            catch(ArgumentNullException e)
+            {
+                MessageBox.Show($"User returned null {e}", "Exception Caught");
             }
         }
 
-        public static async Task<ServerCommandResult> Mute(User user)
+        public static async Task Mute(SausageConnection user)
         {
-            if (user == null)
-                return ServerCommandResult.UserIsNull;
-            else if (ConnectedUsers.Any(x => x == user))
+            try
             {
-                await user.SendAsync($"{CommandParser.ToString(CommandType.UserMuted)}{user.Name}");
-                user.IsMuted = true;
-                return ServerCommandResult.Success;
+                // user exists
+                if (ConnectedUsers.Any(x => x.UserInfo.Guid == user.UserInfo.Guid))
+                {
+                    PacketFormat packet = new PacketFormat(PacketOption.UserMuted)
+                    {
+                        Guid = user.UserInfo.Guid,
+                        Content = "Place-holder reason"
+                    };
+                    user.UserInfo.IsMuted = true;
+                    await Log(packet);
+                }
+                else
+                {
+                    MessageBox.Show("User not found", "Kick result");
+                }
             }
-            else
-                return ServerCommandResult.UserNotFound;
-        }
-
-        public static async Task<ServerCommandResult> Unmute(User user)
-        {
-            if (user == null)
-                return ServerCommandResult.UserIsNull;
-            else if (user.IsMuted && ConnectedUsers.Any(x => x == user))
+            catch(ArgumentNullException e)
             {
-                user.IsMuted = false;
-                await user.SendAsync($"{CommandParser.ToString(CommandType.UserUnmuted)}{user.Name}");
-                await Log(new ServerMessage($"{CommandParser.ToString(CommandType.UserUnmuted)}{user.Name}"), user);
-                return ServerCommandResult.Success;
-            }
-            else
-            {
-                return ServerCommandResult.UserNotFound;
+                MessageBox.Show($"User returned null {e}", "Exception Caught");
             }
         }
 
-        public static async void OnUserConnect(IAsyncResult ar)
+        public static async Task Unmute(SausageConnection user)
         {
-            var user = new User(MainSocket.EndAccept(ar));
+            try
+            {
+                // user exists
+                if (ConnectedUsers.Any(x => x.UserInfo.Guid == user.UserInfo.Guid))
+                {
+                    PacketFormat packet = new PacketFormat(PacketOption.UserUnmuted)
+                    {
+                        Guid = user.UserInfo.Guid
+                    };
+                    user.UserInfo.IsMuted = false;
+                    await Log(packet);
+                }
+                else
+                {
+                    MessageBox.Show("User not found", "Kick result");
+                }
+            }
+            catch (ArgumentNullException e)
+            {
+                MessageBox.Show($"User returned null {e}", "Exception Caught");
+            }
+        }
+
+        // TODO: Add user list
+        public static void OnUserConnect(IAsyncResult ar)
+        {
+            SausageConnection user;
+            try
+            {
+                user = new SausageConnection(MainSocket.EndAccept(ar));
+            }
+            catch(SocketException ex)
+            {
+                Close();
+                return;
+            }
+            catch(ObjectDisposedException ex)
+            {
+                return;
+            }
             if (!Blacklisted.Any(x => x == user.Ip.Address))
             {
-                ConnectedUsers.Add(user);
-                Vm.ConnectedUsers = SortUsersList();
-                await Log(new ServerMessage($"{CommandParser.ToString(CommandType.UserListAppend)}{user.Name}"));
+                UiCtx.Send(x => ConnectedUsers.Add(user));
+                UiCtx.Send(x => Vm.ConnectedUsers = SortUsersList());
+                UiCtx.Send(x => Mw.AddTextToDebugBox($"User connected on {user.Ip}\n"));
+                UsersDictionary.Add(user.UserInfo);
+                // global packet for all the users to know the user has joined
+                PacketFormat GlobalPacket = new PacketFormat(PacketOption.UserConnected)
+                {
+                    Guid = user.UserInfo.Guid,
+                    NewName = user.UserInfo.Name
+                };
+                // local packet for the user (who joined) to get his GUID
+                PacketFormat LocalPacket = new PacketFormat(PacketOption.GetGuid)
+                {
+                    Guid = user.UserInfo.Guid
+                };
+                user.SendAsync(LocalPacket);
+                Log(GlobalPacket, user);
             }
             else
             {
-                await user.SendAsync($"{CommandParser.ToString(CommandType.UserBlackListed)}");
-                await user.Disconnect();
+                // doesn't log if the user is blacklisted
+                user.Disconnect();
             }
             MainSocket.BeginAccept(OnUserConnect, null);
         }
 
-        public async static Task Log(IMessage message, User ignore = null)
+        // TODO: make a switch for the user messge (some packets don't have content)
+        public async static Task Log(PacketFormat message, SausageConnection ignore = null)
         {
-            Vm.Messages.Add(message);
+            if (message.Option == PacketOption.ClientMessage)
+                UiCtx.Send(x => Vm.Messages.Add(new UserMessage(message.Content, UsersDictionary[message.Guid])));
+            else
+                switch(message.Option)
+                {
+                    case PacketOption.NameChange:
+                        UiCtx.Send(x => Vm.Messages.Add(
+                            new ServerMessage($"{UsersDictionary[message.Guid]} changed their name to {message.NewName}")));
+                        break;
+                    default:
+                        UiCtx.Send(x => Vm.Messages.Add(new ServerMessage(message.Content)));
+                        break;
+                }
 
             foreach(var user in ConnectedUsers)
             {
                 if(user != ignore)
-                    user.SendAsync(message.ToString());
+                    user.SendAsync(JsonConvert.SerializeObject(message));
             }
         }
 
-        public static ObservableCollection<User> SortUsersList()
+        public static ObservableCollection<SausageConnection> SortUsersList()
         {
-            List<User> names = new List<User>(Vm.ConnectedUsers);
-            names.Sort(new UserComparer());
+            List<SausageConnection> names = new List<SausageConnection>(Vm.ConnectedUsers);
+            names.Sort(new ConnectionComparer());
 
-            return new ObservableCollection<User>(names);
+            return new ObservableCollection<SausageConnection>(names);
         }
     }
 }

@@ -14,40 +14,47 @@ using System.Windows.Shapes;
 
 namespace SausageChatClient
 {
-  /// <summary>
-  /// Interaction logic for Window1.xaml
-  /// </summary>
-  public partial class Window1 
-  {
-    public Window1()
+    /// <summary>
+    /// Interaction logic for Window1.xaml
+    /// </summary>
+    public partial class Window1
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Window1"/> class.
+        /// </summary>
+        public Window1()
+        {
 
 
 
-      InitializeComponent();
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Defines the user_input_string
+        /// </summary>
+        public static string UserInput;// will be used to store the name the user has set for himself.  global
+
+        /// <summary>
+        /// The Enter_name_input_box_TextChanged
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="TextChangedEventArgs"/></param>
+        private void Enter_name_input_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+        }
+
+        /// <summary>
+        /// The Set_name_Button_Click
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="RoutedEventArgs"/></param>
+        private void Set_name_Button_Click(object sender, RoutedEventArgs e)
+        {
+            UserInput = Enter_name_input_box.Text;
+            
+
+            this.Close();
+        }
     }
-
-
-    string user_input_string; // will be used to store the name the user has set for himself.  global 
-
-
-
-    private void Enter_name_input_box_TextChanged(object sender, TextChangedEventArgs e)
-    {
-       
-    }
-
-
-
-   
-
-    private void Set_name_Button_Click(object sender, RoutedEventArgs e)
-    {
-      user_input_string = Enter_name_input_box.Text;
-     
-
-      this.Close();
-
-    }
-  }
 }

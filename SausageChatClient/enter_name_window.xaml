@@ -1,59 +1,69 @@
-<Window x:Name="Popup_window" x:Class="SausageChatClient.Window1"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SausageChatClient"
-        mc:Ignorable="d"
-        Title="Change_Name" Height="182" Width="459" Background="#FF008CFF">
-  <Grid HorizontalAlignment="Right" Width="451">
-    <Grid.RowDefinitions>
-      <RowDefinition/>
-    </Grid.RowDefinitions>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition/>
-    </Grid.ColumnDefinitions>
-    <StackPanel Margin="125,10,136,10">
-      <Label HorizontalContentAlignment="Center" x:Name="Enter_name_Label" Content="Enter New Name" Foreground="#FFFCFDFF" Background="{x:Null}" Height="30" Margin="0,0,0,7"/>
+<Window
+    x:Class="SausageChatClient.Window1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:SausageChatClient"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Popup_window"
+    Title="Change_Name"
+    Width="459"
+    Height="182"
+    Background="#FF008CFF"
+    mc:Ignorable="d">
+    <Grid Width="451" HorizontalAlignment="Right">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="125,10,136,10">
+            <Label
+                x:Name="Enter_name_Label"
+                Height="30"
+                Margin="0,0,0,7"
+                HorizontalContentAlignment="Center"
+                Background="{x:Null}"
+                Content="Enter new name"
+                Foreground="#FFFCFDFF" />
 
 
 
 
-      <TextBox x:Name="Enter_name_input_box" HorizontalContentAlignment="Center" Height="28" TextWrapping="Wrap" Margin="0,0,0,6" Background="#FF419EEA" Foreground="#FFFCFDFF" TextChanged="Enter_name_input_box_TextChanged">
-
-        <TextBox.Style>
-          <Style TargetType="TextBox">
-
-
-            <!---
-            Screw it. Wasting too much time on this crap. 
-            <Style.Triggers>
-              <MultiTrigger>
-
-                <MultiTrigger.Conditions>
-                  <Condition Property="Text" Value="Enter your name here">
-                    
-                  </Condition>
-                  <Condition Property="IsMouseOver" Value="True"> </Condition>
-                </MultiTrigger.Conditions>
-                <Setter Property="g"  Value=""></Setter>
-              </MultiTrigger>
-
-                
-               -->
+            <TextBox
+                x:Name="Enter_name_input_box"
+                Height="28"
+                Margin="0,0,0,6"
+                HorizontalContentAlignment="Center"
+                mah:TextBoxHelper.AutoWatermark="True"
+                mah:TextBoxHelper.HasText="True"
+                mah:TextBoxHelper.IsSpellCheckContextMenuEnabled="True"
+                mah:TextBoxHelper.Watermark="Enter new name here"
+                Background="#FF419EEA"
+                BorderBrush="#FF008CFF"
+                Foreground="#FFFCFDFF"
+                TextChanged="Enter_name_input_box_TextChanged"
+                TextWrapping="Wrap" />
 
 
 
+            <Button
+                x:Name="Set_name_Button"
+                Width="190"
+                Height="16"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                Background="#FF419EEA"
+                BorderBrush="#FFABADB3"
+                Click="Set_name_Button_Click"
+                Content="Set Name"
+                Foreground="#FFFCFDFF" />
 
 
-          </Style>
+        </StackPanel>
 
-        </TextBox.Style>
-      </TextBox>
-      <Button x:Name="Set_name_Button" Content="Set Name"  HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="16" VerticalAlignment="Top" Width="190" Background="#FF419EEA" BorderBrush="#FFABADB3" Foreground="#FFFCFDFF" Click="Set_name_Button_Click"/>
-
-
-    </StackPanel>
-
-  </Grid>
+    </Grid>
 </Window>
