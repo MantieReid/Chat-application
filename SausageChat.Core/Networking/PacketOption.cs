@@ -6,8 +6,6 @@
         IsServer,
         // any client message (includes GUID)
         ClientMessage,
-        // when a user joins, he will get a list of all users (from the server, this will only be sent to him)
-        UserList,
         // on user banned (includes GUID)
         UserBanned,
         // on user kicked (includes GUID)
@@ -22,13 +20,25 @@
         UserConnected,
         // on user change name (includes GUID & NewName)
         NameChange,
-        // when a client joins the server, he needs to get a GUID
+        // when a client joins the server, he needs to get a GUID and a list of users
         GetGuid,
         // Friend request sent
         FriendRequest,
         // Friend request accepted
         FriendRequestAccepted,
         // Friend request denied
-        FriendRequestDenied
+        FriendRequestDenied,
+        // DmMessage
+        DmMessage,
+        // Dm start request (from user1 to user2)
+        DmStartRequest,
+        // Dm Accept (from user2 back to user1)
+        DmAccepted,
+        // Dm Denied (from user2 back to user1)
+        DmDenied,
+        // Give admin perms
+        AdminPermsRecieved,
+        // Remove admin perms
+        AdminPermsRemoved
     }
 }

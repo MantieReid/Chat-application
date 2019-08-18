@@ -15,7 +15,6 @@ using System.Threading;
 
 namespace SausageChat.Networking
 {
-    // TD -> when renaming, make sure there isn't another user called the same name (would mess up Mute/Kick/Ban)
     static class SausageServer
     {
         public static bool IsOpen { get; set; } = false;
@@ -68,6 +67,7 @@ namespace SausageChat.Networking
                 {
                     u.Disconnect();
                 }
+                UiCtx.Send(x => Vm.Messages = new ObservableCollection<IMessage>());
                 UiCtx.Send(x => Vm.Messages.Add(new ServerMessage("Closed all sockets")));
                 IsOpen = false;
             }
@@ -211,8 +211,8 @@ namespace SausageChat.Networking
             {
                 UiCtx.Send(x => ConnectedUsers.Add(user));
                 UiCtx.Send(x => Vm.ConnectedUsers = SortUsersList());
+                UiCtx.Send(x => Vm.Messages.Add(new ServerMessage($"{user} has connected")));
                 UiCtx.Send(x => Mw.AddTextToDebugBox($"User connected on {user.Ip}\n"));
-                UsersDictionary.Add(user.UserInfo);
                 // global packet for all the users to know the user has joined
                 PacketFormat GlobalPacket = new PacketFormat(PacketOption.UserConnected)
                 {
@@ -222,8 +222,10 @@ namespace SausageChat.Networking
                 // local packet for the user (who joined) to get his GUID
                 PacketFormat LocalPacket = new PacketFormat(PacketOption.GetGuid)
                 {
-                    Guid = user.UserInfo.Guid
+                    Guid = user.UserInfo.Guid,
+                    UsersList = UsersDictionary.ToArray()
                 };
+                UsersDictionary.Add(user.UserInfo);
                 user.SendAsync(LocalPacket);
                 Log(GlobalPacket, user);
             }

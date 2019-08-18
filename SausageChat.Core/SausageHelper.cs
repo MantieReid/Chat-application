@@ -5,6 +5,7 @@
  * - Archy (Disco)
  */
 
+using System;
 using System.Threading;
 
 namespace SausageChat.Core
@@ -18,5 +19,7 @@ namespace SausageChat.Core
         /// <param name="UiCtx">Thread context</param>
         /// <param name="d">Callback</param>
         public static void Send(this SynchronizationContext UiCtx, SendOrPostCallback d) => UiCtx.Send(d, null);
+
+        public static void StripData(ref byte[] Data) => Array.Resize(ref Data, Array.FindLastIndex(Data, Data.Length - 1, x => x != 0) + 1);
     }
 }

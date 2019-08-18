@@ -28,7 +28,6 @@ namespace SausageChat.Core
                 var index = Users.IndexOf(Users.First(x => x.Guid == guid));
 
                 UiCtx.Send(x => Users[index] = value);
-                NotifyCollectionChanged(NotifyCollectionChangedAction.Replace);
             }
         }
 
@@ -39,8 +38,10 @@ namespace SausageChat.Core
 
         private void NotifyCollectionChanged(NotifyCollectionChangedAction CCA, [CallerMemberName] string CollectionName = "")
         {
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(CCA));
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(CCA, nameof(Users)));
         }
+
+        public User[] ToArray() => Users.ToArray();
 
         public void Remove(Guid guid)
         {
@@ -53,6 +54,14 @@ namespace SausageChat.Core
             UiCtx.Send(x => Users.Remove(user));
 
             UiCtx.Send(x => NotifyCollectionChanged(NotifyCollectionChangedAction.Remove));
+        }
+
+        public void Add(User[] UsersArray)
+        {
+            foreach(var u in UsersArray)
+            {
+                Add(u);
+            }
         }
 
         public void Add(User user)

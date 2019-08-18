@@ -11,6 +11,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Threading;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace SausageChatClient.Networking
 {
@@ -20,7 +21,7 @@ namespace SausageChatClient.Networking
         public static byte[] Data = new byte[1024];
         public static Dictionary<string, IPEndPoint> IpPool { get; set; } = new Dictionary<string, IPEndPoint>()
         {
-            ["Disco"] = new IPEndPoint(IPAddress.Parse("89.139.194.57"), 60000)
+            ["Disco"] = new IPEndPoint(IPAddress.Parse("93.172.118.193"), 60000)
         };
         public static Dictionary<string, ObservableCollection<User>> Friends
         {
@@ -51,9 +52,9 @@ namespace SausageChatClient.Networking
         public static SynchronizationContext UiCtx { get; set; }
 
         public static bool Contains(this Dictionary<string, ObservableCollection<User>> friends, Guid guid) =>
-            (friends["OnlineFriends"].Any(x => x.Guid == guid) || friends["OfflineFriends"].Any(x => x.Guid == guid));
+            friends["OnlineFriends"].Any(x => x.Guid == guid) || friends["OfflineFriends"].Any(x => x.Guid == guid);
 
-        public static void Start(string option)
+        public static async Task Start(string option)
         {
             try
             {
@@ -65,7 +66,7 @@ namespace SausageChatClient.Networking
             {
                 ServerIp = IpPool[option];
                 Socket = new Socket(ServerIp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                Socket.Connect(ServerIp);
+                await Socket.ConnectAsync(ServerIp);
                 UiCtx = SynchronizationContext.Current;
                 Log(new ServerMessage("Connected"));
                 Listen();
@@ -81,7 +82,6 @@ namespace SausageChatClient.Networking
         public static void Listen()
         {
             if (!Socket.Connected) return;
-            Log(new ServerMessage("Started listening..."));
 
             try
             {
@@ -95,7 +95,6 @@ namespace SausageChatClient.Networking
 
         public static void OnMessageRecieved(IAsyncResult ar)
         {
-            Log(new ServerMessage("Recieved Message"));
             try
             {
                 Socket.EndReceive(ar); 
@@ -105,7 +104,7 @@ namespace SausageChatClient.Networking
                 return;
             }
 
-            StripData();
+            SausageHelper.StripData(ref Data);
             Parse(Encoding.ASCII.GetString(Data));
 
             Data = new byte[1024];
@@ -127,9 +126,8 @@ namespace SausageChatClient.Networking
                 case PacketOption.NameChange:
                     if (Message.Guid != ClientInfo.Guid)
                     {
-                        User user = UsersList[Message.Guid];
-                        Log(new ServerMessage($"{user.Name} has changed their name to {Message.NewName}"));
-                        user.Name = Message.NewName;
+                        Log(new ServerMessage($"{UsersList[Message.Guid].Name} has changed their name to {Message.NewName}"));
+                        UsersList[Message.Guid].Name = Message.NewName;
                         break;
                     }
                     Log(new ServerMessage($"You changed your name to {ClientInfo.Name}"));
@@ -181,12 +179,11 @@ namespace SausageChatClient.Networking
                     Log(new ServerMessage($"{UsersList[Message.Guid]} has disconnected"));
                     UsersList.Remove(Message.Guid);
                     break;
-                case PacketOption.UserList:
-                    Vm.UsersList = new SausageUserList(Message.UsersList);
-                    break;
                 case PacketOption.GetGuid:
                     ClientInfo = new User(Message.Guid.ToString(), Message.Guid);
                     Log(new ServerMessage($"{Message.Guid.ToString()} has joined."));
+                    if(Message.UsersList != null)
+                        UsersList.Add(Message.UsersList);
                     UsersList.Add(ClientInfo);
                     break;
                 case PacketOption.FriendRequest:
@@ -217,39 +214,48 @@ namespace SausageChatClient.Networking
                 case PacketOption.FriendRequestDenied:
                     Log(new ServerMessage("Friend request denied"));
                     break;
+                case PacketOption.AdminPermsRecieved:
+                    if (Message.Guid == ClientInfo.Guid)
+                    {
+                        ClientInfo.IsAdmin = true;
+                        Log(new ServerMessage($"You are now admin"));
+                    }
+                    else
+                        Log(new ServerMessage($"{UsersList[Message.Guid]} is now admin"));
+                    break;
+                case PacketOption.AdminPermsRemoved:
+                    if (Message.Guid == ClientInfo.Guid)
+                    {
+                        ClientInfo.IsAdmin = false;
+                        Log(new ServerMessage($"You are no longer admin"));
+                    }
+                    else
+                        Log(new ServerMessage($"{UsersList[Message.Guid]} is no longer admin"));
+                    break;
             }
         }
-
-        /// <summary>
-        /// removes all null characters
-        /// </summary>
-        private static void StripData() => Array.Resize(ref Data, Array.FindLastIndex(Data, Data.Length - 1, x => x != 0) + 1);
 
         public static void Send(string message)
         {
             if (!Socket.Connected) return;
 
             byte[] bytesMessage = Encoding.ASCII.GetBytes(message);
-
-            Log(new ServerMessage("Started Sending..."));
+            
 
             try
             {
                 Socket.BeginSend(bytesMessage, 0, bytesMessage.Length, SocketFlags.None, OnSendComplete, null);
             }
-            catch(SocketException)
+            catch (SocketException)
             {
                 return;
             }
         }
 
-        public static void Send(IMessage message) => Send(message.ToString());
-
         public static void Send(PacketFormat packet) => Send(JsonConvert.SerializeObject(packet));
 
         private static void OnSendComplete(IAsyncResult ar)
         {
-            Log("Sent Data");
             try
             {
                 Socket.EndSend(ar);
@@ -303,7 +309,7 @@ namespace SausageChatClient.Networking
         // the server will return the rename message thus no need for logging (in client)
         public static void Rename(string newName)
         {
-            ClientInfo.Name = newName;
+            UsersList[ClientInfo.Guid].Name = newName;
             PacketFormat packet = new PacketFormat(PacketOption.NameChange)
             {
                 Guid = ClientInfo.Guid,

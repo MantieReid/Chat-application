@@ -5,16 +5,16 @@
     xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:messaging="clr-namespace:SausageChat.Core.Messaging;assembly=SausageChat.Core"
     x:Name="Server_Window"
     Title="Server_Window"
-    xmlns:messaging="clr-namespace:SausageChat.Core.Messaging;assembly=SausageChat.Core"
-    Width="814"
-    Height="552"
-    Background="#FF008CFF"
+    Width="1074"
+    Height="675"
+    Background="{x:Null}"
     BorderBrush="#FF008CFF"
+    GlowBrush="{DynamicResource AccentColorBrush}"
     NonActiveBorderBrush="#FF008CFF"
     NonActiveWindowTitleBrush="#FF008CFF"
-    ResizeMode="NoResize"
     mc:Ignorable="d">
 
 
@@ -22,7 +22,7 @@
 
 
         <Style TargetType="ListBoxItem">
-            <Setter Property="Background" Value="#FF419EEA" />
+            <Setter Property="Background" Value="#FF202225" />
             <Setter Property="Foreground" Value="#FFFCFDFF" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -33,240 +33,198 @@
 
         <DataTemplate DataType="{x:Type messaging:UserMessage}">
             <TextBlock
-            HorizontalAlignment="Left"
-            Foreground="White"
-            Text="{Binding}" />
+                HorizontalAlignment="Left"
+                FontSize="15"
+                Foreground="White"
+                Text="{Binding}" />
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type messaging:ServerMessage}">
             <TextBlock
-        HorizontalAlignment="Center"
-        Foreground="#011627"
-        Text="{Binding}" />
+                HorizontalAlignment="Center"
+                FontSize="20"
+                FontWeight="Bold"
+                Foreground="#FFB33C40"
+                Text="{Binding}" />
         </DataTemplate>
 
 
-        <Style TargetType="{x:Type MenuItem}">
-            <Setter Property="Background" Value="#FF419EEA" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type MenuItem}">
-                        <Border
-                        Padding="17,0"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        SnapsToDevicePixels="True">
-                            <ContentPresenter
-                            Content="{TemplateBinding Header}"
-                            RecognizesAccessKey="True"
-                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsHighlighted" Value="true">
-                                <Setter Property="Background" Value="#011627" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-
-
     </Window.Resources>
-    <Grid Background="#FF008CFF">
+
+
+
+    <Grid Background="#FF36393F">
 
         <Grid.ColumnDefinitions>
             <!--  Define the columns for the grid  -->
 
-            <ColumnDefinition Width="527*" />
-            <!--  The first row.  -->
-            <!--  The Second Column  -->
-            <ColumnDefinition Width="218*" />
-            <!--  The third column  -->
-
-
-            <ColumnDefinition Width="286*" />
-            <!--  The Fourth column  -->
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="auto" />
 
 
         </Grid.ColumnDefinitions>
 
 
 
-
-
-        <StackPanel
+        <Grid
             x:Name="Stack_panel_for_chatbox_and_other_buttons_"
+            Grid.Column="1"
             Height="auto"
-            Margin="0,0,22,0"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Top">
+            VerticalAlignment="Stretch"
+            Background="#FF36393F">
+
+            <Grid.RowDefinitions>
+
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
 
 
             <ScrollViewer
-                Grid.Column="1"
-                Width="{Binding Width, ElementName=Stack_panel_for_chatbox_and_other_buttons_}"
-                Margin="0,0,1,0"
-                Controls:ScrollViewerHelper.IsHorizontalScrollWheelEnabled="True"
+                Grid.Row="0"
+                MinWidth="400"
+                MinHeight="300"
+                Background="#202225"
+                BorderBrush="#FF36393F"
                 Foreground="{x:Null}"
+                HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Visible">
-                
-                <ScrollViewer.Background>
-                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}" />
-                </ScrollViewer.Background>
-                
+
+
+
                 <ItemsControl
                     x:Name="Messages"
-                    Width="384.129"
-                    Height="315"
+                    MinWidth="384.129"
+                    MinHeight="315"
+                    Margin="0,0,5,0"
                     HorizontalAlignment="Stretch"
-                    Background="#FF419EEA"
-                    BorderBrush="#FF008CFF"
+                    VerticalAlignment="Stretch"
+                    Background="#FF36393F"
+                    BorderBrush="#FF36393F"
                     Foreground="White"
-                    ItemsSource="{Binding Messages}">
-                </ItemsControl>
+                    ItemsSource="{Binding Messages}" />
             </ScrollViewer>
 
             <TextBox
                 x:Name="Server_message_input_box"
-                Height="35"
-                Margin="0,16,6.013,20"
-                HorizontalAlignment="Stretch"
+                Grid.Row="1"
+                Height="31"
+                Margin="0,1,81,1"
                 Controls:TextBoxHelper.Watermark="Enter Server Message"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
-                CaretBrush="#FF008CFF"
+                Background="#FF484C52"
+                BorderBrush="#FF484C52"
+                CaretBrush="#FF484C52"
                 Foreground="White"
                 KeyDown="Server_message_input_box_KeyDown"
+                SelectionBrush="{x:Null}"
                 SpellCheck.IsEnabled="True"
                 TextChanged="Server_message_button_TextChanged"
                 TextWrapping="Wrap" />
             <Button
                 x:Name="Send_message_Button"
+                Grid.Row="1"
+                Width="81"
                 Height="33"
-                Margin="0,0,6.013,0"
-                VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
+                Margin="200,0,0,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Background="#FF484C52"
+                BorderBrush="#FF484C52"
                 Click="Send_message_Button_Click"
                 Content="Send"
                 Foreground="#FFFCFDFF"
                 RenderTransformOrigin="0.542,1.415" />
-        </StackPanel>
+        </Grid>
 
 
-        <StackPanel
+        <Grid
             x:Name="Stack_panel_for_buttons"
-            Grid.Column="1"
+            Grid.Column="0"
             Width="auto"
-            Height="auto">
+            Height="auto"
+            Background="#FF2F3136">
 
-            <StackPanel.Resources>
-                <Style TargetType="{x:Type Button}">
-                    <!--  Set target type of the style to button  -->
-                    <Setter Property="Margin" Value="0,10,0,0" />
-                    <!--  Give 10 margin space in height to each button  -->
-                </Style>
-            </StackPanel.Resources>
+            <Grid.RowDefinitions>
 
-            <Button
-                x:Name="Mute_Button"
-                Height="38"
-                Margin="0,10,15,0"
-                VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
-                Click="Mute_Button_Click"
-                Content="Mute"
-                Foreground="#FFFCFDFF" />
-            <Button
-                x:Name="Kick_Button"
-                Height="44"
-                Margin="0,10,15,0"
-                VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
-                Click="Kick_Button_Click"
-                Content="Kick"
-                Foreground="#FFFCFDFF" />
-            <Button
-                x:Name="Ban_Button"
-                Height="44"
-                Margin="0,10,15,0"
-                VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
-                Click="Ban_Button_Click"
-                Content="Ban"
-                Foreground="#FFFCFDFF"
-                RenderTransformOrigin="0.275,1.364" />
-            <Button
-                x:Name="Info_Button"
-                Height="44"
-                Margin="0,10,15,0"
-                VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
-                Click="Info_Button_Click"
-                Content="Info"
-                Foreground="#FFFCFDFF" />
-            <Button
-                x:Name="Info2_Button"
-                Height="44"
-                Margin="0,10,15,0"
-                VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
-                Click="Button_Click"
-                Content="info?"
-                Foreground="#FFFCFDFF" />
+
+                <RowDefinition Height="100" />
+                <RowDefinition Height="100" />
+
+
+
+
+            </Grid.RowDefinitions>
+
             <Button
                 x:Name="Stop_Server"
-                Height="44"
-                Margin="0,10,15,0"
+                Grid.Row="0"
+                MinWidth="270"
+                MinHeight="44"
+                Margin="5,10,5,10"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
+                Background="#FF202225"
+                BorderBrush="#FF484C52"
                 Click="Stop_Server_Click"
                 Content="Stop Server"
                 Foreground="#FFFCFDFF" />
+
             <Button
                 x:Name="Start_server"
-                Height="44"
-                Margin="0,10,15,0"
+                Grid.Row="2"
+                MinWidth="270"
+                MinHeight="44"
+                Margin="5,0"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
+                Background="#FF202225"
+                BorderBrush="#FF484C52"
                 Click="Start_server_Click"
                 Content="Start Server"
                 Foreground="#FFFCFDFF" />
-        </StackPanel>
-        <!--  The item source should be bound to the Users list in the VM, and it can bind to the name property  -->
-        <StackPanel Grid.Column="2" Margin="0,0,-4,0">
+        </Grid>
+
+        <Grid Grid.Column="2" Background="#FF2F3136">
+            <Grid.RowDefinitions>
+
+                <RowDefinition Height="*" />
+                <RowDefinition Height="9*" />
+
+                <RowDefinition Height="auto" />
+
+
+            </Grid.RowDefinitions>
+
+
             <Label
-                Width="214"
-                Height="25"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
+                Grid.Row="0"
+                Width="auto"
+                MinHeight="25"
+                VerticalAlignment="Stretch"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
                 Content="User List"
                 Foreground="White" />
-            <ScrollViewer Margin="10,0,0,0">
+            <ScrollViewer
+                Grid.Row="1"
+                Margin="10,0,0,0"
+                Background="#FF202225"
+                Foreground="White">
                 <ListBox
                     x:Name="User_List"
-                    Width="201"
-                    Height="216"
-                    Background="#FF419EEA"
-                    BorderBrush="#FF008CFF"
+                    MinWidth="201"
+                    MinHeight="216"
+                    Margin="0,0,0,0"
+                    Background="#FF2F3136"
+                    BorderBrush="#FF484C52"
                     Foreground="#FFFCFDFF"
                     ItemsSource="{Binding ConnectedUsers}"
                     SelectionChanged="ListBox_SelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Path=UserInfo.Name}"/>
+                            <TextBlock Text="{Binding Path=UserInfo.Name}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
 
@@ -274,40 +232,32 @@
                         <ContextMenu>
 
                             <MenuItem
-                                BorderBrush="#FF008CFF"
-                                Foreground="White"
-                                Header="Mute User"
                                 x:Name="ContextMenuMute"
-                                Click="ContextMenuMute_Click"/>
+                                Click="ContextMenuMute_Click"
+                                Header="Mute User" />
 
                             <MenuItem
-                                BorderBrush="#FF008CFF"
-                                Foreground="White"
-                                Header="Kick User"
                                 x:Name="ContextMenuKick"
-                                Click="ContextMenuKick_Click"/>
+                                Click="ContextMenuKick_Click"
+                                Header="Kick User" />
 
                             <MenuItem
-                                BorderBrush="#FF008CFF"
-                                Foreground="White"
-                                Header="Ban User"
                                 x:Name="ContextMenuBan"
-                                Click="ContextMenuBan_Click"/>
+                                Click="ContextMenuBan_Click"
+                                Header="Ban User" />
+
+                            <MenuItem 
+                                x:Name="ContextMenuAdmin"
+                                Click="ContextMenuAdmin_Click"
+                                Header="Give Admin" />
+
 
                         </ContextMenu>
                     </ListBox.ContextMenu>
 
                 </ListBox>
             </ScrollViewer>
-            <TextBox
-                x:Name="DebugBox"
-                Height="175"
-                Margin="10,10,14,0"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
-                Foreground="White"
-                TextWrapping="Wrap" />
-        </StackPanel>
+        </Grid>
 
 
     </Grid>

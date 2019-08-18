@@ -5,13 +5,14 @@ using SausageChat.Core;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System;
+using System.Windows;
 
 namespace SausageChat
 {
-  class ViewModel : INotifyPropertyChanged
-  {
+    class ViewModel : INotifyPropertyChanged
+    {
         public ObservableCollection<IMessage> Messages { get; set; } //a collection of messages
-                                                                 // User names (for user list)
+                                                                     // User names (for user list)
         private ObservableCollection<SausageConnection> _connectedUsers;
         public ObservableCollection<SausageConnection> ConnectedUsers
         {
@@ -35,12 +36,11 @@ namespace SausageChat
 
         public ViewModel()
         {
+            var dictionary = new ResourceDictionary();
+            dictionary.Source = new Uri("pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Dialogs.xaml");
+
             Messages = new ObservableCollection<IMessage>();
-            Messages.Add(new ServerMessage("Hello!"));
-      Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!")); Messages.Add(new ServerMessage("Hello!"));
-      ConnectedUsers = new ObservableCollection<SausageConnection>();
-            ConnectedUsers.Add(new SausageConnection("Sally"));
-            ConnectedUsers.Add(new SausageConnection("Bob"));
+            ConnectedUsers = new ObservableCollection<SausageConnection>();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

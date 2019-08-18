@@ -6,20 +6,20 @@
     xmlns:local="clr-namespace:SausageChatClient"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    x:Name="Popup_window"
+    x:Name="Change_Name"
     Title="Change_Name"
     Width="459"
     Height="182"
-    Background="#FF008CFF"
+    Background="#FF36393F"
     mc:Ignorable="d">
-    <Grid Width="451" HorizontalAlignment="Right">
-        <Grid.RowDefinitions>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+    <Grid
+        Width="451"
+        HorizontalAlignment="Right"
+        Background="#FF36393F">
+
+
         <StackPanel Margin="125,10,136,10">
+
             <Label
                 x:Name="Enter_name_Label"
                 Height="30"
@@ -28,9 +28,6 @@
                 Background="{x:Null}"
                 Content="Enter new name"
                 Foreground="#FFFCFDFF" />
-
-
-
 
             <TextBox
                 x:Name="Enter_name_input_box"
@@ -41,13 +38,12 @@
                 mah:TextBoxHelper.HasText="True"
                 mah:TextBoxHelper.IsSpellCheckContextMenuEnabled="True"
                 mah:TextBoxHelper.Watermark="Enter new name here"
-                Background="#FF419EEA"
-                BorderBrush="#FF008CFF"
+                Background="#FF484C52"
+                BorderBrush="#FF484C52"
                 Foreground="#FFFCFDFF"
+                KeyDown="Enter_name_input_box_KeyDown"
                 TextChanged="Enter_name_input_box_TextChanged"
                 TextWrapping="Wrap" />
-
-
 
             <Button
                 x:Name="Set_name_Button"
@@ -56,12 +52,11 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Center"
-                Background="#FF419EEA"
+                Background="#FF484C52"
                 BorderBrush="#FFABADB3"
                 Click="Set_name_Button_Click"
                 Content="Set Name"
                 Foreground="#FFFCFDFF" />
-
 
         </StackPanel>
 
