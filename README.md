@@ -1,6 +1,6 @@
-# SausageChat
+# Chat Application
 
-Sausage chat, is a fully asynchronous chatroom application with renaming, kicking, banning and muting features.
+ A fully asynchronous chatroom application with renaming, kicking, banning and muting features.
 This is purely for fun and meant to help us learn about asynchronous sockets and managing threads in GUI development correctly.
 
 Here is a GIF of the program in action. 
